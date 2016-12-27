@@ -25,7 +25,9 @@ sudo openssl genrsa -out web2py.key 1024
 sudo openssl req -batch -new -key web2py.key -out web2py.csr
 sudo openssl x509 -req -days 1780 -in web2py.csr -signkey web2py.key -out web2py.crt
 cd /var/www/web2py
-sudo -u www-data python -c "from gluon.main import save_password;save_password('admin',443)"
+echo -n Set web2py Admin Interface Password: 
+read -s password
+sudo -u www-data python -c "from gluon.main import save_password;save_password('$password',9090)"
 sudo service gunicorn restart
 sudo service nginx restart
 sudo apt-get -y install mysql-server
