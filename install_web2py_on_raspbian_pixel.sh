@@ -1,6 +1,7 @@
 cwd=$(pwd)
 sudo apt-get -y update
 sudo apt-get -y upgrade
+sudo apt-get -y install unzip
 sudo apt-get -y install nginx
 sudo apt-get -y install gunicorn
 sudo mkdir /var/www
