@@ -1,0 +1,80 @@
+upstream gunicorn {
+        #server unix:/tmp/gunicorn.sock fail_timeout=0;
+        # For a TCP configuration:
+        server 127.0.0.1:9090 fail_timeout=0;
+}
+ 
+server {
+        listen 80 default;
+        client_max_body_size 4G;
+        server_name $hostname;
+ 
+        keepalive_timeout 5;
+ 
+        location ~* /(\w+)/static/ {
+                root /var/www/web2py/applications/;
+        }
+ 
+        ## gunicorn
+        location / {
+                # checks for static file, if not found proxy to app
+                try_files $uri @proxy_to_gunicorn;
+        }
+ 
+        location @proxy_to_gunicorn {
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header Host $http_host;
+                proxy_redirect off;
+ 
+                proxy_pass   http://gunicorn;
+        }
+}
+server {
+        # Enable TLS and HTTP2
+        #listen      443 ssl http2;
+        listen      443 ssl;
+        client_max_body_size 4G;
+        server_name $hostname;
+	add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+ 
+        # Use only TLS
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+        # Tell client which ciphers are available
+        ssl_prefer_server_ciphers on;
+        #ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DH+3DES:!ADH:!AECDH:!MD5;
+        ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:!ADH:!AECDH:!MD5;
+
+        # Use our own DH params run: $ sudo openssl dhparam 2048 -out /etc/nginx/ssl/dhparam.pem
+        #ssl_dhparam /etc/nginx/ssl/dhparam.pem;
+
+        # Optimize session cache 
+        ssl_session_cache   shared:SSL:40m;
+        ssl_session_timeout 4h;
+
+        # Enable session tickets
+         ssl_session_tickets on;
+
+        #ssl_certificate /etc/nginx/ssl/dds_herzudigital_com.crt;
+	
+	#use the bundle certificate
+        #ssl_certificate /etc/nginx/ssl/ssl_bundle.crt;
+        #ssl_certificate_key /etc/nginx/ssl/dds.herzudigital.com.key;
+        ssl_certificate /etc/nginx/ssl/web2py.crt;
+        ssl_certificate_key /etc/nginx/ssl/web2py.key; 
+
+        location / {
+                # checks for static file, if not found proxy to app
+                try_files $uri @proxy_to_gunicorn;
+        }
+ 
+        location @proxy_to_gunicorn {
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Ssl on;
+                proxy_set_header Host $http_host;
+                proxy_redirect off;
+ 
+                proxy_pass   http://gunicorn;
+        }
+}
+

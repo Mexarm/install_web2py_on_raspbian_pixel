@@ -1,0 +1,53 @@
+upstream gunicorn {
+        #server unix:/tmp/gunicorn.sock fail_timeout=0;
+        # For a TCP configuration:
+        server 127.0.0.1:9090 fail_timeout=0;
+}
+ 
+server {
+        listen 80 default;
+        client_max_body_size 4G;
+        server_name $hostname;
+ 
+        keepalive_timeout 5;
+ 
+        location ~* /(\w+)/static/ {
+                root /var/www/web2py/applications/;
+        }
+ 
+        ## gunicorn
+        location / {
+                # checks for static file, if not found proxy to app
+                try_files $uri @proxy_to_gunicorn;
+        }
+ 
+        location @proxy_to_gunicorn {
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header Host $http_host;
+                proxy_redirect off;
+ 
+                proxy_pass   http://gunicorn;
+        }
+}
+server {
+        listen 443 default_server ssl;
+        client_max_body_size 4G;
+        server_name $hostname;
+ 
+        ssl_certificate /etc/nginx/ssl/web2py.crt;
+        ssl_certificate_key /etc/nginx/ssl/web2py.key;
+ 
+        location / {
+                # checks for static file, if not found proxy to app
+                try_files $uri @proxy_to_gunicorn;
+        }
+ 
+        location @proxy_to_gunicorn {
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Ssl on;
+                proxy_set_header Host $http_host;
+                proxy_redirect off;
+ 
+                proxy_pass   http://gunicorn;
+        }
+}

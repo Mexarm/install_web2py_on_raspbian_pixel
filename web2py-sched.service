@@ -1,0 +1,11 @@
+[Unit]
+Description=Web2Py scheduler service
+#Enable to ensure that workers are started after mysql service
+After=mysql.service
+
+[Service]
+ExecStart=/usr/bin/python /var/www/web2py/web2py.py -K welcome
+Type=simple
+Restart=always
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+CONFIG = {
+    # 'mode': 'wsgi',
+    'working_dir': '/var/www/web2py',
+    # 'python': '/usr/bin/python',
+    'args': (
+        '--user=www-data', '--group=www-data',
+        '--bind=127.0.0.1:9090',
+        '--workers=1',
+        '--timeout=600',
+        #'--worker-class=eventlet', # choose a worker class, here i'm using eventlet
+        'wsgihandler',
+    ),
+}
