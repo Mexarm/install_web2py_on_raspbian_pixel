@@ -34,6 +34,7 @@ sudo -u www-data python -c "from gluon.main import save_password;save_password('
 sudo service gunicorn restart
 sudo service nginx restart
 sudo apt-get -y install mysql-server
+sudo mysql_secure_installation
 printf "[Unit]\nDescription=Web2Py scheduler service\n#Enable to ensure that workers are started after mysql service\nAfter=mysql.service\n\n[Service]\nExecStart=/usr/bin/python /var/www/web2py/web2py.py -K welcome\nType=simple\nRestart=always\n[Install]\nWantedBy=multi-user.target" > $cwd/web2py-sched.service
 sudo cp $cwd/web2py-sched.service /etc/systemd/system/web2py-sched.service
 #install the service
