@@ -3,7 +3,7 @@ sudo apt-get -y update
 sudo apt-get -y upgrade
 sudo apt-get -y install unzip
 sudo apt-get -y install nginx
-sudo apt-get install virtualenv
+sudo apt-get -y install virtualenv
 sudo mkdir /var/www
 cd /var/www
 sudo wget http://www.web2py.com/examples/static/web2py_src.zip
