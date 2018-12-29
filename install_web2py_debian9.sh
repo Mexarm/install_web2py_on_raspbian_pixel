@@ -31,6 +31,13 @@ echo setting password...
 sudo -u www-data python -c "from gluon.main import save_password;save_password('$password',9090)"
 sudo apt-get -y install mysql-server
 sudo mysql_secure_installation
+if [ -f .mysql_admin_passwd ]; then
+    PASSWDB=$(<.mysql_admin_passwd)
+else
+    PASSWDB="$(openssl rand -base64 12)"
+    echo "$PASSWDB" >.mysql_admin_passwd
+fi
+sudo mysql -e "GRANT ALL ON *.* TO 'admin'@'localhost' IDENTIFIED BY '$PASSWDB' WITH GRANT OPTION;FLUSH PRIVILEGES"
 printf "[Unit]\nDescription=Web2Py scheduler service\n#Enable to ensure that workers are started after mysql service\nAfter=mysql.service\n\n[Service]\nExecStart=/usr/bin/python /var/www/web2py/web2py.py -K welcome\nType=simple\nRestart=always\n[Install]\nWantedBy=multi-user.target" > $cwd/web2py-sched.service
 sudo cp $cwd/web2py-sched.service /etc/systemd/system/web2py-sched.service
 #install the service
@@ -38,3 +45,6 @@ sudo systemctl enable /etc/systemd/system/web2py-sched.service
 sudo -u www-data bash -c 'virtualenv /var/www/web2py;source /var/www/web2py/bin/activate;pip install gunicorn'
 sudo service gunicorn restart
 sudo service nginx restart
+echo -------------------
+echo mysql console \$mysql -u admin -p
+echo password is in  .mysql_admin_passwdb file
