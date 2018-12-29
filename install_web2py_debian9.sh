@@ -4,6 +4,12 @@ sudo apt-get -y upgrade
 sudo apt-get -y install unzip
 sudo apt-get -y install nginx
 sudo apt-get -y install virtualenv
+if [ -f .mysql_admin_passwd ]; then
+    PASSWDB=$(<.mysql_admin_passwd)
+else
+    PASSWDB="$(openssl rand -base64 12)"
+    echo "$PASSWDB" >.mysql_admin_passwd
+fi
 sudo mkdir /var/www
 cd /var/www
 sudo wget http://www.web2py.com/examples/static/web2py_src.zip
@@ -31,12 +37,6 @@ echo setting password...
 sudo -u www-data python -c "from gluon.main import save_password;save_password('$password',9090)"
 sudo apt-get -y install mysql-server
 sudo mysql_secure_installation
-if [ -f .mysql_admin_passwd ]; then
-    PASSWDB=$(<.mysql_admin_passwd)
-else
-    PASSWDB="$(openssl rand -base64 12)"
-    echo "$PASSWDB" >.mysql_admin_passwd
-fi
 sudo mysql -e "GRANT ALL ON *.* TO 'admin'@'localhost' IDENTIFIED BY '$PASSWDB' WITH GRANT OPTION;FLUSH PRIVILEGES"
 printf "[Unit]\nDescription=Web2Py scheduler service\n#Enable to ensure that workers are started after mysql service\nAfter=mysql.service\n\n[Service]\nExecStart=/usr/bin/python /var/www/web2py/web2py.py -K welcome\nType=simple\nRestart=always\n[Install]\nWantedBy=multi-user.target" > $cwd/web2py-sched.service
 sudo cp $cwd/web2py-sched.service /etc/systemd/system/web2py-sched.service
