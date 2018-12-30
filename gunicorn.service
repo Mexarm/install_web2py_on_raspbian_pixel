@@ -7,7 +7,7 @@ User=www-data
 Group=www-data
 WorkingDirectory=/var/www/web2py
 #ExecStart=/usr/bin/gunicorn --bind 127.0.0.1:9090 wsgihandler:application
-ExecStart=/var/www/web2py/bin/gunicorn --bind 127.0.0.1:9090 wsgihandler:application
+ExecStart=/var/www/web2py/bin/gunicorn --bind 127.0.0.1:9090 --workers=4 --timeout=600 wsgihandler:application
 Restart=always
 
 [Install]
