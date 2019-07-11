@@ -45,6 +45,7 @@ sudo systemctl enable /etc/systemd/system/web2py-sched.service
 sudo -u www-data bash -c 'virtualenv /var/www/web2py;source /var/www/web2py/bin/activate;pip install gunicorn'
 sudo service gunicorn restart
 sudo service nginx restart
+sudo timedatectl set-timezone America/Mexico_City
 echo -------------------
 echo mysql console \$mysql -u admin -p
 echo password is in  .mysql_admin_passwdb file
